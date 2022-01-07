@@ -63,7 +63,7 @@ UniversalTutorialRepository.getAccessToken()
             defaultValue={DEFAULT_IMAGE_SIZE}
             onChange={this.onSizeChange}
             style={{
-              width: '100px',
+              width: '150px',
               textAlign: 'center',
               justifyContent:'center'
             }}
