@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
@@ -7,14 +8,29 @@ import './App.css';
 import { UniversalTutorialRepository, API_UNIVERSAL_AUTH_TOKEN } from '../repositories/univesal-tutorial-repo';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { setSearchField, requestRobots } from '../store-redux/actions';
 
 const DEFAULT_IMAGE_SIZE = '32x24';
+
+
+const mapStateToProps = (state) => {
+	return {
+		searchField: state.searchRobots.searchField,
+		countries: state.requestRobots.robots,
+		isPending: state.requestRobots.isPending
+	}
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+    onRequestRobots: () => dispatch(requestRobots())
+  }
+}
 class App extends Component {
 	constructor() {
 		super();
 		this.state = {
-			countries: [],
-			searchfield: '',
 			imageSize: DEFAULT_IMAGE_SIZE
 		};
 	}
@@ -24,34 +40,23 @@ class App extends Component {
 			.then(response => {
 				sessionStorage.setItem(API_UNIVERSAL_AUTH_TOKEN, response.auth_token);
 			})
-			.then(() =>
-				UniversalTutorialRepository.getCountries().then(response => {
-					this.setState({
-						countries: response
-					});
-				})
-			);
+			.then(() => this.props.onRequestRobots());
 	}
-	onSearchChange = event => {
-		this.setState({ searchfield: event.target.value });
-	};
 	onSizeChange = event => {
 		this.setState({ imageSize: event.target.value });
 	};
-
 	render() {
-		const { countries, searchfield } = this.state;
+    	const {searchField, onSearchChange, countries, isPending} = this.props
 
 		const filteredCountries = countries.filter(country => {
-			return country.country_name.toLowerCase().includes(searchfield.toLowerCase());
+			return country.country_name.toLowerCase().includes(searchField.toLowerCase());
 		});
-		return !countries.length ? (
+		return isPending ? (
 			<h1>Loading</h1>
 		) : (
 			<div className="tc">
 				<div className="sticky">
 					<h1 className="f1">Countries</h1>
-
 					<div className="wrapper ">
 						<Selection
 							list={[
@@ -70,16 +75,14 @@ class App extends Component {
 							}}
 							className=" b--green bg-lightest-blue"
 						/>
-						<SearchBox searchChange={this.onSearchChange} />
+						<SearchBox searchChange={onSearchChange} />
 					</div>
 				</div>
 
           <div className="content">
-            		<ErrorBoundary>
 					<Scroll>
 							<CardList countries={filteredCountries} imageSize={this.state.imageSize} />
               </Scroll>
-						</ErrorBoundary>
               
 				</div>
 			</div>
@@ -87,4 +90,4 @@ class App extends Component {
 	}
 }
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App)

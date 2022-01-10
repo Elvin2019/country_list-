@@ -5,7 +5,7 @@ const Scroll = (props) => {
     const { height, width } = useWindowDimensions();
 
   return (
-    <div style={{ overflow: 'scroll', border: '5px solid black', height: height - 200, }}>
+    <div style={{ overflow: 'scroll', border: '5px solid black', height: height - 215, }}>
       {props.children}
     </div>
   );
